@@ -1,0 +1,258 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Random;
+
+public class SnakeGame extends JPanel implements ActionListener, KeyListener {
+    private class Tile {
+        int x;
+        int y;
+
+        Tile(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    int boardWidth;
+    int boardHeight;
+    int tileSize = 25;
+
+    // Snake
+    Tile snakeHead;
+    ArrayList<Tile> snakeBody;
+
+    // Food
+    Tile food;
+    Random random;
+
+    // game logic
+    Timer gameLoop;
+    int velocityX;
+    int velocityY;
+    boolean gameOver = false;
+
+    SnakeGame(int boardWidth, int boardHeight) {
+        this.boardWidth = boardWidth;
+        this.boardHeight = boardHeight;
+        setPreferredSize(new Dimension(this.boardWidth, this.boardHeight));
+        setBackground(Color.black);
+        addKeyListener(this);
+        setFocusable(true);
+
+        snakeHead = new Tile(5, 5);
+        snakeBody = new ArrayList<Tile>();
+
+        food = new Tile(10, 10);
+        random = new Random();
+        placeFood();
+
+        velocityX = 0;
+        velocityY = 0;
+
+        gameLoop = new Timer(100, this);
+        gameLoop.start();
+    }
+
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        draw(g);
+    }
+
+    public void draw(Graphics g) {
+        // Grid
+        for (int i = 0; i < boardWidth/tileSize; i++) {
+            g.drawLine(i*tileSize, 0, i*tileSize, boardHeight);
+            g.drawLine(0, i*tileSize, boardWidth, i*tileSize);
+        }
+
+        // Food
+        g.setColor(Color.red);
+        g.fillRect(food.x*tileSize, food.y*tileSize, tileSize, tileSize);
+
+        // Snake Head
+        g.setColor(Color.green);
+        g.fillRect(snakeHead.x*tileSize, snakeHead.y*tileSize, tileSize, tileSize);
+
+        // Snake Body
+        for (int i = 0; i < snakeBody.size(); i++) {
+            Tile snakePart = snakeBody.get(i);
+            g.fillRect(snakePart.x*tileSize, snakePart.y*tileSize, tileSize, tileSize);
+        }
+
+        // Score
+        g.setFont(new Font("Arial", Font.PLAIN, 16));
+        if (gameOver) {
+            g.setColor(Color.red);
+            g.drawString("Game Over: " + String.valueOf(snakeBody.size()), tileSize - 16, tileSize);
+        }
+        else {
+            g.drawString("Score: " + String.valueOf(snakeBody.size()), tileSize - 16, tileSize);
+        }
+    }
+
+    public void placeFood() {
+        food.x = random.nextInt(boardWidth/tileSize);
+        food.y = random.nextInt(boardHeight/tileSize);
+    }
+
+    public boolean collision(Tile tile1, Tile tile2) {
+        return tile1.x == tile2.x && tile1.y == tile2.y;
+    }
+
+    public void move() {
+        // Eat food
+        if (collision(snakeHead, food)) {
+            snakeBody.add(new Tile(food.x, food.y));
+            placeFood();
+        }
+
+        // Move snake body
+        for (int i = snakeBody.size()-1; i >= 0; i--) {
+            Tile snakePart = snakeBody.get(i);
+            if (i == 0) {
+                snakePart.x = snakeHead.x;
+                snakePart.y = snakeHead.y;
+            }
+            else {
+                Tile prevSnakePart = snakeBody.get(i-1);
+                snakePart.x = prevSnakePart.x;
+                snakePart.y = prevSnakePart.y;
+            }
+        }
+
+        // Move snake head
+        snakeHead.x += velocityX;
+        snakeHead.y += velocityY;
+
+        // Game over conditions
+        for (int i = 0; i < snakeBody.size(); i++) {
+            Tile snakePart = snakeBody.get(i);
+
+            // Collide with snake body
+            if (collision(snakeHead, snakePart)) {
+                gameOver = true;
+            }
+        }
+
+        if (snakeHead.x*tileSize < 0 || snakeHead.x*tileSize > boardWidth || 
+            snakeHead.y*tileSize < 0 || snakeHead.y*tileSize > boardHeight) {
+            gameOver = true;
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        move();
+        repaint();
+        if (gameOver) {
+            gameLoop.stop();
+        }
+    }
+}
+
+@Override
+public void keyPressed(KeyEvent e) {
+    // Check if the UP arrow key is pressed and the snake is not moving downwards
+    if (e.getKeyCode() == KeyEvent.VK_UP && velocityY != 1) {
+        velocityX = 0;
+        velocityY = -1; // Set the velocity to move upwards
+    }
+    // Check if the DOWN arrow key is pressed and the snake is not moving upwards
+    else if (e.getKeyCode() == KeyEvent.VK_DOWN && velocityY != -1) {
+        velocityX = 0;
+        velocityY = 1; // Set the velocity to move downwards
+    }
+    // Check if the LEFT arrow key is pressed and the snake is not moving to the right
+    else if (e.getKeyCode() == KeyEvent.VK_LEFT && velocityX != 1) {
+        velocityX = -1; // Set the velocity to move to the left
+        velocityY = 0;
+    }
+    // Check if the RIGHT arrow key is pressed and the snake is not moving to the left
+    else if (e.getKeyCode() == KeyEvent.VK_RIGHT && velocityX != -1) {
+        velocityX = 1; // Set the velocity to move to the right
+        velocityY = 0;
+    }
+}
+
+@Override
+public void keyTyped(KeyEvent e) {
+    // No action needed for keyTyped method
+}
+
+@Override
+public void keyReleased(KeyEvent e) {
+    // No action needed for keyReleased method
+}
+
+public static void main(String[] args) {
+    JFrame frame = new JFrame("SNAKE GAME");
+    SnakeGame snakeGame = new SnakeGame(400, 400);
+
+    frame.add(snakeGame);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.pack();
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(true);
+}
+}
+
+
+
+
+
+
+
+
+
+
+HALF EXPLAINATION
+Explanation
+
+The code provided is a simple implementation of the classic game "Snake" using Java and Swing. It consists of a SnakeGame class that extends JPanel and implements ActionListener and KeyListener. The class represents the game board and handles the game logic.
+Tile Class
+
+The Tile class is a simple class that represents a tile on the game board. It has two properties: x and y, which represent the coordinates of the tile.
+Variables
+
+    boardWidth and boardHeight: These variables represent the width and height of the game board, respectively.
+    tileSize: This variable represents the size of each tile on the game board.
+    snakeHead: This variable represents the head of the snake.
+    snakeBody: This variable is an ArrayList that stores the body parts of the snake.
+    food: This variable represents the food that the snake needs to eat.
+    random: This variable is used to generate random numbers for placing the food on the game board.
+    gameLoop: This variable is a Timer that controls the game loop.
+    velocityX and velocityY: These variables represent the velocity of the snake in the x and y directions, respectively.
+    gameOver: This variable indicates whether the game is over or not.
+
+Constructor
+
+The constructor of the SnakeGame class initializes the game board and sets up the initial state of the game. It takes the boardWidth and boardHeight as parameters and sets the preferred size of the panel to match the dimensions of the game board. It also sets the background color, adds the key listener, and makes the panel focusable.
+paintComponent Method
+
+The paintComponent method is responsible for drawing the game board and its components. It is called automatically whenever the panel needs to be repainted. It takes a Graphics object as a parameter and uses it to draw the grid, food, snake head, snake body, and the score.
+draw Method
+
+The draw method is a helper method used by the paintComponent method to draw the different components of the game board. It takes a Graphics object as a parameter and uses it to draw the grid, food, snake head, snake body, and the score.
+placeFood Method
+
+The placeFood method is responsible for placing the food on the game board. It generates random coordinates for the food within the bounds of the game board.
+collision Method
+
+The collision method checks if two tiles have collided by comparing their coordinates. It takes two Tile objects as parameters and returns true if they have collided, and false otherwise.
+move Method
+
+The move method is responsible for moving the snake and updating the game state. It checks if the snake has eaten the food, moves the snake body, moves the snake head, and checks for game over conditions.
+actionPerformed Method
+
+The actionPerformed method is called by the game loop timer at regular intervals. It calls the move method, repaints the panel, and stops the game loop if the game is over.
+
+
+Explanation
+
+In the keyPressed method, comments have been added to explain the logic behind each condition. Each block of code checks the key pressed and the current velocity of the snake to determine the direction of movement. Comments help in understanding the purpose of each if-else block and the corresponding velocity adjustments.
+
+The keyTyped and keyReleased methods do not require any action, so comments have been added to indicate that these methods are intentionally left blank.
+
+In the main method, comments have not been added as the code is straightforward and self-explanatory. The code initializes the game window, sets up the SnakeGame object, adds it to the frame, configures frame settings, and displays the frame to start the game.
