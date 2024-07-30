@@ -1,0 +1,196 @@
+						CODE
+package InterMediate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Employee {
+    private int id;
+    private String name;
+    private String department;
+    private String position;
+
+    public Employee(int id, String name, String department, String position) {
+        this.id = id;
+        this.name = name;
+        this.department = department;
+        this.position = position;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setName(String name2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setName'");
+    }
+
+    public void setDepartment(String department2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setDepartment'");
+    }
+
+    public void setPosition(String position2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setPosition'");
+    }
+}
+
+public class employeeManagementApp {
+    private List<Employee> employees;
+    private Scanner scanner;
+
+    public employeeManagementApp() {
+        this.employees = new ArrayList<>();
+        this.scanner = new Scanner(System.in);
+    }
+
+    public void addEmployee() {
+        System.out.print("Enter employee ID: ");
+        int id = scanner.nextInt();
+        System.out.print("Enter employee name: ");
+        String name = scanner.next();
+        System.out.print("Enter employee department: ");
+        String department = scanner.next();
+        System.out.print("Enter employee position: ");
+        String position = scanner.next();
+
+        Employee employee = new Employee(id, name, department, position);
+        employees.add(employee);
+        System.out.println("Employee added successfully!");
+    }
+
+    public void viewEmployees() {
+        System.out.println("Employee List:");
+        for (Employee employee : employees) {
+            System.out.println("ID: " + employee.getId() + ", Name: " + employee.getName() + ", Department: " + employee.getDepartment() + ", Position: " + employee.getPosition());
+        }
+    }
+
+    public void updateEmployee() {
+        System.out.print("Enter employee ID to update: ");
+        int id = scanner.nextInt();
+        for (Employee employee : employees) {
+            if (employee.getId() == id) {
+                System.out.print("Enter new name: ");
+                String name = scanner.next();
+                System.out.print("Enter new department: ");
+                String department = scanner.next();
+                System.out.print("Enter new position: ");
+                String position = scanner.next();
+
+                employee.setName(name);
+                employee.setDepartment(department);
+                employee.setPosition(position);
+                System.out.println("Employee updated successfully!");
+                return;
+            }
+        }
+        System.out.println("Employee not found!");
+    }
+
+    public void deleteEmployee() {
+        System.out.print("Enter employee ID to delete: ");
+        int id = scanner.nextInt();
+        for (Employee employee : employees) {
+            if (employee.getId() == id) {
+                employees.remove(employee);
+                System.out.println("Employee deleted successfully!");
+                return;
+            }
+        }
+        System.out.println("Employee not found!");
+    }
+
+    public static void main(String[] args) {
+        employeeManagementApp app = new employeeManagementApp();
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("Employee Management Application");
+            System.out.println("1. Add Employee");
+            System.out.println("2. View Employees");
+            System.out.println("3. Update Employee");
+            System.out.println("4. Delete Employee");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+            int option = scanner.nextInt();
+
+            switch (option) {
+                case 1:
+                    app.addEmployee();
+                    break;
+                case 2:
+                    app.viewEmployees();
+                    break;
+                case 3:
+                    app.updateEmployee();
+                    break;
+                case 4:
+                    app.deleteEmployee();
+                    break;
+                case 5:
+                    System.out.println("Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+						EXPLAINATION
+
+
+Employee class
+
+    This class represents an employee with four attributes: id, name, department, and position.
+    The class has a constructor that initializes these attributes.
+    It also has getter methods for each attribute, which allow other classes to access their values.
+    The setter methods (setName, setDepartment, and setPosition) are currently throwing UnsupportedOperationException because they are not implemented. This means that the employee's attributes cannot be modified once they are set.
+
+employeeManagementApp class
+
+    This class is the main application class that manages a list of employees.
+    It has two instance variables: employees (a list of Employee objects) and scanner (a Scanner object for reading user input).
+    The constructor initializes the employees list and creates a new Scanner object.
+    The class has four methods:
+        addEmployee(): prompts the user to enter an employee's details and adds a new Employee object to the employees list.
+        viewEmployees(): displays a list of all employees in the employees list, showing their id, name, department, and position.
+        updateEmployee(): prompts the user to enter an employee's ID and then updates the corresponding employee's details in the employees list.
+        deleteEmployee(): prompts the user to enter an employee's ID and then removes the corresponding employee from the employees list.
+
+main method
+
+    This is the entry point of the program.
+    It creates an instance of the employeeManagementApp class and a new Scanner object.
+    It then enters an infinite loop that displays a menu to the user:
+        Add Employee
+        View Employees
+        Update Employee
+        Delete Employee
+        Exit
+    Based on the user's input, it calls the corresponding method of the employeeManagementApp class.
+    If the user chooses to exit, the program prints "Goodbye!" and terminates.
+
+In summary, this program allows users to add, view, update, and delete employees in a simple management system.
